@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cmath>
 
+using namespace std;
+
 class Heaparr {
 public:
 	Heaparr();
@@ -46,7 +48,7 @@ void Heaparr::heapSort(int heapArray[], int heap_size) {
 	Build_Max_Heap(heapArray, heap_size);
 
 	for (int i = n - 1; i >= 1; i--) {
-		std::swap(heapArray[0], heapArray[i]);
+		swap(heapArray[0], heapArray[i]);
 		heap_size = heap_size - 1;
 		Max_Heapify(heapArray, 0, heap_size);
 	}
@@ -74,7 +76,7 @@ void Heaparr::Max_Heapify(int heapArray[], int i, int heap_size) {
 		largest = r;
 
 	if (largest != i) {
-		std::swap(heapArray[i], heapArray[largest]);
+		swap(heapArray[i], heapArray[largest]);
 		Max_Heapify(heapArray, largest, heap_size);
 	}
 	return;
@@ -85,8 +87,8 @@ int main(int argc, char* argv[]) {
 	Heaparr t;
 	t.heapSort(hArray, sizeof(hArray) / sizeof(hArray[0]));
 	for (auto v : hArray)
-		std::cout << v << ", ";
-	std::cout << std::endl;
+		cout << v << ", ";
+	cout << endl;
 	system("pause");
 	return 0;
 }
