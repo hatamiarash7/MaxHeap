@@ -1,94 +1,209 @@
 #include <iostream>
-#include <cmath>
+#include <string>
+#include <cstdlib>
+#include <vector>
 
 using namespace std;
 
-class Heaparr {
-public:
-	Heaparr();
-	void insert(int da);
-	int getLeft(int i) { return 2 * i + 1; }
-	int getRight(int i) { return 2 * i + 2; }
-	int getParent(int i) { return (i - 1) / 2; }
-	int getMax() { return maxHeap[0]; }
-	void print();
-	void reheap(int num);
-	void makeArray();
-	void Build_Max_Heap(int heapArray[], int heap_size);
-	void Max_Heapify(int heapArray[], int i, int heap_size);
-	void heapSort(int heapArray[], int heap_size);
-
+class Heap {
 private:
-	int size;
-	int* maxHeap;
-	int index;
-	int i;
-};
+	vector<int> nodes;
+	void my_swap(vector<int>&, int, int);
+	int find_index(int);
+public:
+	Heap();
+	vector<int> getHeap();
+	void insert(int);
+	int top();
+	void pop_at(int);
+	void pop(int);
+	bool search(int);
+	void show_items();
+}myHeap;
 
-Heaparr::Heaparr() {
-	maxHeap = nullptr;
-	size = 0;
+Heap::Heap() {
+	nodes.push_back(0); // default root
 }
 
-void Heaparr::insert(int da) {
-	size++;
-	int* tmp = new int[size];
-
-	for (int i = 0; i < size - 1; i++)
-		tmp[i] = maxHeap[i];
-
-	tmp[size - 1] = da;
-	delete[] maxHeap;
-	maxHeap = tmp;
+vector<int> Heap::getHeap() {
+	// return every value (except first : default root)
+	return vector<int>(nodes.begin() + 1, nodes.end());
 }
 
-void Heaparr::heapSort(int heapArray[], int heap_size) {
-	size = heap_size;
-	int n = size;
-	Build_Max_Heap(heapArray, heap_size);
-
-	for (int i = n - 1; i >= 1; i--) {
-		swap(heapArray[0], heapArray[i]);
-		heap_size = heap_size - 1;
-		Max_Heapify(heapArray, 0, heap_size);
+void Heap::insert(int value) {
+	bool done = false;
+	// new node will be inserted at the size of the vector ( end )
+	unsigned long currentLoc = nodes.size();
+	// Add value to end of vector
+	nodes.push_back(value);
+	// move up value, if need
+	while (!done)
+	{
+		// not the root node and Value greater than parent
+		if (currentLoc > 1 && nodes[currentLoc] > nodes[currentLoc / 2])
+		{
+			swap(nodes[currentLoc], nodes[currentLoc / 2]);
+			currentLoc /= 2;
+		}
+		else
+			done = true;
 	}
 }
 
-void Heaparr::Build_Max_Heap(int heapArray[], int heap_size) {
-	int n = size;
-	for (int i = floor((n - 1) / 2); i >= 0; i--)
-		Max_Heapify(heapArray, i, heap_size);
-	return;
+int Heap::top() {
+	return nodes[1];
 }
 
-void Heaparr::Max_Heapify(int heapArray[], int i, int heap_size) {
-	// int n = size;
-	int largest = 0;
-	int l = getLeft(i);
-	int r = getRight(i);
+void Heap::pop_at(int index) {
+	bool done = false;
+	unsigned long currentLoc = index;          // current location of item in vector
+	swap(nodes[currentLoc], nodes.back());     // first and last item swaped
+	nodes.pop_back();                          // remove last element
 
-	if ((l < heap_size) && (heapArray[l] < heapArray[i]))
-		largest = l;
-	else 
-		largest = i;
-
-	if ((r < heap_size) && (heapArray[r] < heapArray[largest]))
-		largest = r;
-
-	if (largest != i) {
-		swap(heapArray[i], heapArray[largest]);
-		Max_Heapify(heapArray, largest, heap_size);
+	while (!done)
+	{
+		// possible children location is within the heap and one of the children is greater
+		if (2 * currentLoc + 1 < nodes.size() &&            
+			(nodes[currentLoc] < nodes[2 * currentLoc] ||   
+				nodes[currentLoc] < nodes[2 * currentLoc + 1]))
+		{
+			// Left child is greater than right
+			if (nodes[2 * currentLoc] > nodes[2 * currentLoc + 1])
+			{
+				swap(nodes[currentLoc], nodes[2 * currentLoc]);
+				currentLoc = 2 * currentLoc;
+			}
+			// Right child is greater than left
+			else   
+			{
+				swap(nodes[currentLoc], nodes[2 * currentLoc + 1]);
+				currentLoc = 2 * currentLoc + 1;
+			}
+		}
+		else
+			done = true;
 	}
-	return;
 }
 
-int main(int argc, char* argv[]) {
-	int hArray[8] = { 5, 99, 32, 4, 1, 12, 15, 8 };
-	Heaparr t;
-	t.heapSort(hArray, sizeof(hArray) / sizeof(hArray[0]));
-	for (auto v : hArray)
-		cout << v << ", ";
+int Heap::find_index(int value) {
+	for (int i = 1; i < nodes.size(); i++)
+		if (nodes[i] == value)
+			// return index of curent item
+			return i;
+	return -1;
+}
+
+void Heap::pop(int value) {
+	// find index first
+	int index = find_index(value);
+	if (index == -1) return; // not found
+	pop_at(index);
+}
+
+bool Heap::search(int value) {
+	for (int i = 1; i < nodes.size(); i++)
+		if (nodes[i] == value)
+			return true;
+	return false;
+}
+
+void Heap::my_swap(vector<int> & data, int i, int j)
+{
+	int tmp = data[i];
+	data[i] = data[j];
+	data[j] = tmp;
+}
+
+void Heap::show_items() {
+	vector<int> temp = nodes;
+
+	int length = temp.size();
+	// bubble sort
+	for (int i = 0; i < length; ++i)
+	{
+		bool swapped = false;
+		for (int j = 0; j < length - (i + 1); ++j)
+		{
+			if (temp[j] > temp[j + 1])
+			{
+				my_swap(temp, j, j + 1);
+				swapped = true;
+			}
+		}
+
+		if (!swapped) break;
+	}
+
+	cout << "\n Heap : ";
+	// print reverse
+	for (int i = length - 1; i > 0; i--)
+		cout << temp[i] << " ";
 	cout << endl;
-	system("pause");
-	return 0;
+}
+
+int menu() {
+	system("cls");
+	cout << "\n 1. Show Heap\n";
+	cout << "\n 2. Insert Item\n";
+	cout << "\n 3. Remove Item\n";
+	cout << "\n 4. Sort And Show\n";
+	cout << "\n 5. Remove Root\n";
+	cout << "\n 6. Search An Item\n";
+	cout << "\n 7. Exit\n\n";
+	cout << "\n Wich One ? ";
+	int op;
+	cin >> op;
+	system("cls");
+	return op;
+}
+
+int main() {
+	while (true) {
+		switch (menu()) {
+		case 1: {
+			cout << "\n Heap : ";
+			for (auto& x : myHeap.getHeap())
+				cout << x << " ";
+			break;
+		}
+		case 2: {
+			int item;
+			cout << "\n Enter Number : ";
+			cin >> item;
+			myHeap.insert(item);
+			break;
+		}
+		case 3: {
+			int item;
+			cout << "\n Enter Number : ";
+			cin >> item;
+			myHeap.pop(item);
+			cout << "\n " << item << " Removed !";
+			break;
+		}
+		case 4: {
+			myHeap.show_items();
+			break;
+		}
+		case 5: {
+			myHeap.pop_at(1);
+			cout << "\n Root Removed !";
+			break;
+		}
+		case 6: {
+			int item;
+			cout << "\n Enter Number : ";
+			cin >> item;
+			cout << "\n " << item;
+			myHeap.search(item) ? cout << " Exists !!" : cout << " Not Exists !!";
+			break;
+		}
+		case 7: {
+			exit(1);
+			break;
+		}
+		}
+		cout << "\n\n ";
+		system("pause");
+	}
 }
